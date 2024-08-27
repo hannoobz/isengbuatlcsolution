@@ -1,33 +1,40 @@
 class Solution {
     public double maxProbability(int n, int[][] edges, double[] succProb, int start_node, int end_node) {
-        HashMap<Integer,ArrayList<Pair<Integer,Double>>> adjList = new HashMap<>();
+        HashMap<Integer,ArrayList<Pear>> adjList = new HashMap<>();
         for(int i=0;i<n;++i){
             adjList.put(i,new ArrayList<>());
         }
         for(int i=0;i<edges.length;++i){
-            adjList.get(edges[i][0]).add(new Pair(edges[i][1],succProb[i]));
-            adjList.get(edges[i][1]).add(new Pair(edges[i][0],succProb[i]));
+            adjList.get(edges[i][0]).add(new Pear(edges[i][1],succProb[i]));
+            adjList.get(edges[i][1]).add(new Pear(edges[i][0],succProb[i]));
         }
-        HashMap<Integer,Double> result = new HashMap<>();
-        PriorityQueue<Pair<Integer, Double>> maxHeap = new PriorityQueue<>((a, b) -> Double.compare(b.getValue(), a.getValue()));
-        maxHeap.add(new Pair<>(start_node,1.0));
+        double[] result = new double[n];
+        Arrays.fill(result, 0.0);
+        PriorityQueue<Pear> maxHeap = new PriorityQueue<>((a, b) -> Double.compare(b.weight, a.weight));
+        maxHeap.add(new Pear(start_node,1.0));
         while(!maxHeap.isEmpty()){
-            Pair<Integer,Double> x = maxHeap.poll();
-            if(result.containsKey(x.getKey())){
+            Pear x = maxHeap.poll();
+            if(result[x.node]!=0.0){
                 continue;
             }
-            result.put(x.getKey(),x.getValue());
+            result[x.node] = x.weight;
 
-            for(Pair<Integer, Double> item : adjList.get(x.getKey())) {
-                if(!result.containsKey(item.getKey())){
-                    maxHeap.add(new Pair<>(item.getKey(), item.getValue() * x.getValue()));
+            for(Pear item : adjList.get(x.node)) {
+                if(result[item.node]==0.0){
+                    maxHeap.add(new Pear(item.node, item.weight * x.weight));
                 }
             }
         }
-        if(result.containsKey(end_node)){
-            return result.get(end_node);
-        }
-        return 0;
+        return result[end_node];
     }
+}
 
+class Pear{
+    public int node;
+    public double weight;
+
+    public Pear(int node,double weight){
+        this.node = node;
+        this.weight = weight;
+    }
 }
